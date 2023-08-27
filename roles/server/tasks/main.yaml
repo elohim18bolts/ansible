@@ -1,0 +1,12 @@
+---
+- name: Install server apps for CentOS and AlmaLinux
+  tags: ["server"]
+  block:
+  - name: Deploying server applications
+    ansible.builtin.dnf:
+      name: '@server'
+      state: present
+    notify:
+      - "Enable Cockpit Socket"
+      - "Start Cockpit Service"
+  when: ansible_distribution == "CentOs" or ansible_distribution == "AlmaLinux"

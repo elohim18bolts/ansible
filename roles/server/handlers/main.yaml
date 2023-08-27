@@ -1,0 +1,10 @@
+---
+- name: "Enable Cockpit Socket"
+  ansible.builtin.service:
+    name: cockpit.socket
+    state: enabled
+
+- name: "Start Cockpit Service"
+  ansible.builtin.service:
+    name: cockpit
+    state: started
