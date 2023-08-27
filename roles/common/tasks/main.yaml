@@ -44,6 +44,29 @@
       owner: root
       group: root
       mode: 0644
+    notify: Enable timer
   when: ansible_facts["service_mgr"] == "systemd"
-  notify: Enable timer
+
+- name: Disable password for root user
+  ansible.builtin.user:
+    name: root
+    password_lock: true
+
+- name: Copy ssh public key
+  ansible.builtin.lineinfile:
+    path: /root/.ssh/authorized_keys
+    create: true
+    mode: 0600
+    insertafter: EOF
+    line: "{{ lookup ('file', '~/.ssh/id_ed25519.pub') }}"
+
+- name: Disable ssh password login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '(PermitRootLogin.*)'
+    line: '#\1'
+  notify: Restart sshd
+
+
+
 

@@ -4,3 +4,7 @@
     name: ansible-pull.timer
     state: started
     enabled: yes
+- name: Restart sshd
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
