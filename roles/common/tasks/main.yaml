@@ -37,6 +37,11 @@
       mode: 0644
     when: ansible_facts["service_mgr"] == "systemd"
 
+  - name: Load sensitive data
+    ansible.builtin.include_vars:
+      file: defaults/vault.yaml
+      name: vault
+
   - name: Create ansible pull service
     ansible.builtin.template:
       src: "ansible-pull.service.j2"
