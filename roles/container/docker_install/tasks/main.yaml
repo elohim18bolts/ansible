@@ -1,0 +1,61 @@
+---
+- name: Install docker in ubuntu
+  tags: ["docker"]
+  block:
+  - name: Update repos
+    ansible.builtin.apt:
+      update_cache: yes
+    ignore_errors: true
+
+  - name: Remove conflicting packages
+    ansible.builtin.apt:
+      pkg:
+        - "docker.io"
+        - "docker-compose"
+        - "podman-docker"
+        - "containerd"
+        - "runc"
+        - "docker-doc"
+      state: absent
+
+  - name: Install dependencies
+    ansible.builtin.apt:
+      pkg:
+        - ca-certificates
+        - curl
+        - gnupg
+      state: present
+
+  - name: "Add Docker’s official GPG key"
+    ansible.builtin.shell: |
+      sudo rm -rf /etc/apt/keyrings/docker.gpg
+      sudo install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+
+
+  - name: Set Up Repository
+    ansible.builtin.shell: |
+      sudo rm -rf /etc/apt/sources.list.d/docker.list
+      echo \
+      "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    when: ansible_distribution == "Ubuntu"
+
+  - name: "Install Docker's latest version"
+    ansible.builtin.apt:
+      pkg:
+        - "docker-ce"
+        - "docker-ce-cli"
+        - "containerd.io"
+        - "docker-buildx-plugin"
+        - "docker-compose-plugin"
+      state: latest
+      update_cache: yes
+
+  - name: "Add plugins to PATH"
+    ansible.builtin.shell: |
+      echo "export PATH=${PATH}:/usr/libexec/docker/cli-plugins/" >> /etc/profile
+  when: ansible_distribution == "Ubuntu"
