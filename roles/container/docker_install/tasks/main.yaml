@@ -61,6 +61,8 @@
       update_cache: yes
 
   - name: "Add plugins to PATH"
-    ansible.builtin.shell: |
-      echo "export PATH=${PATH}:/usr/libexec/docker/cli-plugins/" >> /etc/profile
+    ansible.builtin.lineinfile:
+      path: /etc/profile
+      line: "export PATH=$PATH:/usr/libexec/docker/cli-plugins" 
+      state: present
   when: ansible_distribution == "Ubuntu"
