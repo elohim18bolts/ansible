@@ -1,34 +1,33 @@
 ---
-- name: Update and install common packages
-  ansible.builtin.apt:
-    pkg:
-      - sudo
-      - ansible
-      - git
-    state: present
-    update_cache: yes
-  when: ansible_facts["os_family"] == "Debian"
-      
-
-- name: Create ansible user and give privs
+- name: Configure users and keys
+  tags: ["common"]
   block:
-    - name: Create ansible user
-      ansible.builtin.user:
-        name: "ansible"
-        system: true
-        groups: ["sudo"]
+  - name: Update and install common packages
+    ansible.builtin.apt:
+      pkg:
+        - sudo
+        - ansible
+        - git
+      state: present
+      update_cache: yes
+    when: ansible_facts["os_family"] == "Debian"
+        
+
+  - name: Create ansible user
+    ansible.builtin.user:
+      name: "ansible"
+      system: true
+      groups: ["sudo"]
 
 
-    - name: Create sudoer file for ansible user
-      ansible.builtin.template:
-        src: "ansible-sudoer.j2"
-        dest: "/etc/sudoers.d/ansible"
-        owner: root
-        group: root
-        mode: 0440
+  - name: Create sudoer file for ansible user
+    ansible.builtin.template:
+      src: "ansible-sudoer.j2"
+      dest: "/etc/sudoers.d/ansible"
+      owner: root
+      group: root
+      mode: 0440
 
-- name: Create ansible system timer and service
-  block:
   - name: Create ansible pull systemd timer
     ansible.builtin.template:
       src: "ansible-pull.timer.j2"
@@ -36,6 +35,7 @@
       owner: root
       group: root
       mode: 0644
+    when: ansible_facts["service_mgr"] == "systemd"
 
   - name: Create ansible pull service
     ansible.builtin.template:
@@ -45,28 +45,24 @@
       group: root
       mode: 0644
     notify: Enable timer
-  when: ansible_facts["service_mgr"] == "systemd"
+    when: ansible_facts["service_mgr"] == "systemd"
 
-- name: Disable password for root user
-  ansible.builtin.user:
-    name: root
-    password_lock: true
+  - name: Disable password for root user
+    ansible.builtin.user:
+      name: root
+      password_lock: true
 
-- name: Copy ssh public key
-  ansible.builtin.lineinfile:
-    path: /root/.ssh/authorized_keys
-    create: true
-    mode: 0600
-    insertafter: EOF
-    line: "{{ lookup ('file', '~/.ssh/id_ed25519.pub') }}"
+  - name: Copy ssh public key
+    ansible.builtin.lineinfile:
+      path: /root/.ssh/authorized_keys
+      create: true
+      mode: 0600
+      insertafter: EOF
+      line: "{{ lookup ('file', '~/.ssh/id_ed25519.pub') }}"
 
-- name: Disable ssh password login
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '(PermitRootLogin.*)'
-    line: '#\1'
-  notify: Restart sshd
-
-
-
-
+  - name: Disable ssh password login
+    ansible.builtin.lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '(PermitRootLogin.*)'
+      line: '#\1'
+    notify: Restart sshd
