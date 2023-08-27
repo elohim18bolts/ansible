@@ -1,0 +1,10 @@
+[Unit]
+Description=Ansible pull timer to check for repo updates
+
+[Timer]
+{{ ansible_pull_timer }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+WantedBy=multi-user.target

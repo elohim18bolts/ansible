@@ -1,0 +1,47 @@
+- name: Update and install common packages
+  ansible.builtin.apt:
+    pkg:
+      - sudo
+      - ansible
+    state: present
+    update_cache: yes
+  when: ansible_facts["os_family"] == "Debian"
+      
+
+- name: Create ansible user and give privs
+  block:
+    - name: Create ansible user
+      ansible.builtin.user:
+        name: "ansible"
+        system: true
+        groups: ["sudo"]
+
+
+    - name: Create sudoer file for ansible user
+      ansible.builtin.template:
+        src: "ansible-sudoer.j2"
+        dest: "/etc/sudoers.d/ansible"
+        owner: root
+        group: root
+        mode: 0440
+
+- name: Create ansible system timer and service
+  block:
+  - name: Create ansible pull systemd timer
+    ansible.builtin.template:
+      src: "ansible-pull.timer.j2"
+      dest: "{{ systemd_dir }}/ansible-pull.timer"
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Create ansible pull service
+    ansible.builtin.template:
+      src: "ansible-pull.service.j2"
+      dest: "{{ systemd_dir }}/ansible-pull.service"
+      owner: root
+      group: root
+      mode: 0644
+  when: ansible_facts["service_mgr"] == "systemd"
+  notify: Enable timer
+
