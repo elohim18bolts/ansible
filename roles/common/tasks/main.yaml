@@ -1,3 +1,4 @@
+---
 - name: Update and install common packages
   ansible.builtin.apt:
     pkg:
