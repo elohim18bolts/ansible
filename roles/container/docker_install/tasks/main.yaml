@@ -40,10 +40,14 @@
       keyring: "/etc/apt/keyrings/docker.gpg"
       state: present
 
+  - name: Get system architecture
+    ansible.builtin.command: dpkg --print-architecture
+    register: architecture
+
   - name: Configure repository
     ansible.builtin.apt_repository:
       repo: |
-       "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+       "deb [arch={{ architecture.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
             {{ ansible_distribution_release }} stable"
       state: present
 
