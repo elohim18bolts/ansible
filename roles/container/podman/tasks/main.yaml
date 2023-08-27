@@ -1,0 +1,30 @@
+- name: Install podman in debian
+  tags: ["podman"]
+  block:
+  - name: Install podman
+    ansible.builtin.apt:
+      pkg:
+        - podman
+      state: latest
+      update_cache: yes
+
+
+  - name: Get version codename
+    command: |
+      awk -F'=' '{if($1=="VERSION_CODENAME") print $2}' /etc/os-release
+    register: version_codename
+
+  - name: Activate backport repo for debian
+    ansible.builtin.shell: |
+        echo "deb http://deb.debian.org/debian {{ version_codename.stdout }}-backports main" > \
+          /etc/apt/sources.list.d/backports.list
+
+  - name: Install cockpit
+    ansible.builtin.apt:
+      pkg:
+        - cockpit
+        - cockpit-podman
+      state: latest
+      default-release: "{{ version_codename.stdout }}-backports"
+      update_cache: yes
+  when: ansible_facts["distribution"] == "Debian"
