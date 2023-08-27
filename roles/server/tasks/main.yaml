@@ -11,6 +11,3 @@
       - "Start Cockpit Service"
   when: ansible_distribution == "CentOs" or ansible_distribution == "AlmaLinux"
 
-- name: Run Maintenance Tasks
-  ansible.builtin.include_tasks:
-    file: maintenance.yaml

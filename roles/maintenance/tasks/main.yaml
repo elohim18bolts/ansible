@@ -21,8 +21,7 @@
       register: reboot
 
     - name: "Reboot System"
-      ansible.builtin.reboot:
-        reboot_timeout: 600
+      ansible.builtin.command: reboot
       when: reboot.stat.exists
 
   when: ansible_facts["os_family"] == "Debian"
