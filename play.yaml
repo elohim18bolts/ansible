@@ -5,6 +5,7 @@
   become: true
   roles: 
     - container/docker_install
+    - server
 
 - hosts: debian-12
   gather_facts: yes
