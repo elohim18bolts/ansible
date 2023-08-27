@@ -6,4 +6,11 @@
   roles: 
     - container/docker_install
 
+- hosts: debian-12
+  gather_facts: yes
+  user: ansible
+  become: true
+  roles: 
+    - container/podman
+
 
