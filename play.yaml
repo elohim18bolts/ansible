@@ -1,16 +1,9 @@
 ---
-- hosts: ubuntu
+- hosts: izanami,izanagi 
   gather_facts: yes
   user: ansible
   become: true
   roles: 
     - maintenance
-
-- hosts: debian-12
-  gather_facts: yes
-  user: ansible
-  become: true
-  roles: 
-    - container/podman
 
 
