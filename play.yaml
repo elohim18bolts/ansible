@@ -1,9 +1,4 @@
 ---
-- hosts: all
-  gather_facts: yes
-  roles:
-    - common
-
 - hosts: ubuntu
   gather_facts: yes
   user: ansible
