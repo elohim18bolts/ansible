@@ -6,7 +6,7 @@
 
 - hosts: ubuntu
   gather_facts: yes
-  remote_user: ansible
+  user: ansible
   become: true
   roles: 
     - container/docker_install
