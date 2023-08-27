@@ -1,0 +1,32 @@
+---
+- name: Debian maintenance
+  block:
+    - name: Update packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+
+
+    - name: Remove useless packages from the cache
+      ansible.builtin.apt:
+        autoclean: yes
+
+    - name: Remove dependencies that are no longer required
+      ansible.builtin.apt:
+        autoremove: yes
+
+    - name: Check If The Server Needs a Reboot
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+        register: reboot
+
+    - name: Reboot System
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+      when: reboot.stat.exists
+
+  when: ansible_facts["os_family"] == "Debian"
+
+
+     
+
