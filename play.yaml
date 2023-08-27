@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: yes
+  roles:
+    - common
+
+- hosts: ubuntu
+  gather_facts: yes
+  remote_user: ansible
+  become: true
+  roles: 
+    - container/docker_install
+
+
