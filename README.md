@@ -4,12 +4,20 @@ This are my ansible configs to create and install roles in remote machines. I us
 ## Install
 Before the host can run by itself you must push the ansible configuration only once using the command:
 ```bash
-ansible-playbook play.yaml -u root --ask-pass -i $hostname,
+ansible-playbook all.yaml -u root --ask-pass -i $hostname,
+```
+The file `all.yaml` is the playbook file containeing the initial hosts who will be running `ansible-pull` job.
+An example of this file can be:
+```yaml
+- hosts: all
+  gather_facts: yes
+  roles: 
+    - common
 ```
 ### Configuring timer
 To configure the timer you can specify when the `ansible-pull` service can run you can pass the variable `ansible_pull_timer`. This variable accepts the systemd `[timer]` format. Example:
 ```bash
-ansible-playbook play.yaml -u root --ask-pass -i $hostname, --extra-vars '{"ansible_pull_timer":"OnBootSec=5min\nOnCalendar=daily"}'
+ansible-playbook all.yaml -u root --ask-pass -i $hostname, --extra-vars '{"ansible_pull_timer":"OnBootSec=5min\nOnCalendar=daily"}'
 ```
 
 ### Ansible-pull options
