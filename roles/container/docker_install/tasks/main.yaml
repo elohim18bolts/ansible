@@ -47,8 +47,7 @@
   - name: Configure repository
     ansible.builtin.apt_repository:
       repo: |
-       "deb [arch={{ architecture.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-            {{ ansible_distribution_release }} stable"
+       "deb [arch={{ architecture.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
       state: present
 
   - name: "Install Docker's latest version"
