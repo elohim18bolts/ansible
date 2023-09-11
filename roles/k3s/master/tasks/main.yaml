@@ -1,0 +1,37 @@
+---
+- name: Install Dependencies
+  ansible.builtin.apt:
+    pkg:
+      - git
+      - curl
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Create configuration path
+  ansible.builtin.file:
+    path: "/etc/rancher/k3s"
+    state: directory
+    owner: root
+    group: root
+    mode: '0664'
+
+- name: Load configuration file
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "/etc/rancher/k3s/config.yaml"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Load Kubelet DNS Resolver Configuration
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: "/etc/k3s_resolv.conf"
+    owner: root
+    group: root
+  when: dns_servers is defined
+
+- name: Run k3s Installation Script
+  ansible.builtin.shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server" sh -s
+    
+

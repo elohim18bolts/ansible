@@ -1,0 +1,7 @@
+#server_args: "server --cluster-init --tls-san {{ ansible_hostname }}"
+kube_config_mode: "0644"
+cluster_init: true
+tls_san_list: ["{{ ansible_hostname }}", "{{ ansible_default_ipv4.address }}"]
+cluster_cdir: "10.42.0.0/16"
+disable: ["traefik", "servicelb"]
+dns_servers: ["10.100.1.1"]

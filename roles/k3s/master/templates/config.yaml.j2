@@ -1,0 +1,15 @@
+write-kube-config-mode: "{{ kube_config_mode }}"
+cluster-init: {{ cluster_init }}
+tls-san:
+{% for i in tls_san_list %}
+  - "{{ i }}"
+{% endfor %}
+cluster-cdir: "{{ cluster_cdir }}"
+disable:
+{% for i in disable %}
+  - "{{ i }}"
+{% endfor %}
+{% if dns_servers is defined %}
+resolv-conf: "/etc/k3s_resolv.conf"
+{% endif %}
+
