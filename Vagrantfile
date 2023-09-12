@@ -3,8 +3,9 @@
 #
 require 'yaml'
 file = YAML.load_file("./vagrant/inventory.yaml")
-master_node = file['vagrant_masters']['hosts']
-nodes = file['vagrant_nodes']['hosts']
+master_node = (file['vagrant_masters']['hosts']).keys
+nodes = (file['vagrant_nodes']['hosts']).keys
+
 #
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -58,7 +59,7 @@ Vagrant.configure("2") do |config|
    # end
   end
   nodes.each_with_index do |node,index|
-    config.vm.define "#{node}" do |n|
+    config.vm.define "node-#{node.gsub('.','_')}" do |n|
       n.vm.network "private_network",ip:"#{node}"
       n.vm.hostname = "node-#{index}"
       n.vm.provider "parallels" do |prl|
