@@ -51,12 +51,12 @@ Vagrant.configure("2") do |config|
        # Customize the amount of memory on the VM:
        prl.memory = "1024"
      end
-   # config.vm.provision "ansible" do |ansible|
-   #   ansible.verbose = "v"
-   #   ansible.limit = "all"
-   #   ansible.inventory_path = "vagrant/inventory.yaml"
-   #   ansible.playbook = "vagrant/vagrant_play.yaml"
-   # end
+    master.vm.provision :ansible do |ansible|
+      ansible.verbose = "v"
+      ansible.limit = "all"
+      ansible.inventory_path = "vagrant/inventory.yaml"
+      ansible.playbook = "vagrant/vagrant_play.yaml"
+    end
   end
   nodes.each_with_index do |node,index|
     config.vm.define "node-#{node.gsub('.','_')}" do |n|
