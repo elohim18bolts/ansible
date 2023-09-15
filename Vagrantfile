@@ -4,8 +4,11 @@
 require 'yaml'
 file = YAML.load_file("./vagrant/inventory.yaml")
 master_node = (file['vagrant_masters']['hosts']).keys
+#master_node = []
 nodes = (file['vagrant_nodes']['hosts']).keys
+nodes = master_node.concat(nodes)
 
+PROVISIONER = "parallels"
 #
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -37,35 +40,33 @@ Vagrant.configure("2") do |config|
   # via 127.0.0.1 to disable public access
   # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
   #
+   config.vm.provider :PROVISIONER do |prl|
+     # Display the VirtualBox GUI when booting the machine
+     #vb.gui = true
+     # Customize the amount of memory on the VM:
+     prl.memory = "1024"
+   end
 
-  config.vm.define "master" do |master|
-    # Create a private network, which allows host-only access to the machine
-    # using a specific IP.
-    master.vm.network "private_network", ip: "#{master_node[0]}"
-    master.vm.hostname = "vagrant-master"
+ # Store the raw ssh key arguments for each node
+  raw_ssh_key_args = []
 
-    #
-     master.vm.provider "parallels" do |prl|
-       # Display the VirtualBox GUI when booting the machine
-       #vb.gui = true
-       # Customize the amount of memory on the VM:
-       prl.memory = "1024"
-     end
-    master.vm.provision :ansible do |ansible|
-      ansible.verbose = "v"
-      ansible.limit = "all"
-      ansible.inventory_path = "vagrant/inventory.yaml"
-      ansible.playbook = "vagrant/vagrant_play.yaml"
-    end
-  end
   nodes.each_with_index do |node,index|
-    config.vm.define "node-#{node.gsub('.','_')}" do |n|
+    config.vm.define "node-#{index}" do |n|
       n.vm.network "private_network",ip:"#{node}"
       n.vm.hostname = "node-#{index}"
-      n.vm.provider "parallels" do |prl|
-        prl.memory = "1024"
+      raw_ssh_key_args << "-o IdentityFile=.vagrant/machines/node-#{index}/#{PROVISIONER}/private_key"
+      if index == (nodes.length - 1)
+        sleep(2)
+        n.vm.provision :ansible do |ansible|
+          ansible.verbose = "v"
+          ansible.limit = "all"
+          ansible.inventory_path = "vagrant/inventory.yaml"
+          ansible.playbook = "vagrant/vagrant_play.yaml"
+          ansible.raw_ssh_args = raw_ssh_key_args
+        end
       end
     end
   end
+
 
 end
