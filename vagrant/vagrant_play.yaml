@@ -3,3 +3,8 @@
   become: yes
   roles:
     - ../roles/k3s/master
+
+- hosts: vagrant_nodes
+  become: yes
+  roles:
+    - ../roles/k3s/node
