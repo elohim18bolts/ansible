@@ -1,4 +1,6 @@
+{% if write_config_mode is defined %}
 write-kube-config-mode: "{{ kube_config_mode }}"
+{% endif %}
 cluster-init: {{ cluster_init }}
 tls-san:
 {% for i in tls_san_list %}

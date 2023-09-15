@@ -1,0 +1,20 @@
+---
+- name: Install Dependencies
+  ansible.builtin.apt:
+    pkg:
+      - git
+      - curl
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+
+- name: Check if k3s service is already in the system
+  ansible.builtin.stat:
+    path: /etc/systemd/system/k3s-agent.service
+  register: p
+
+
+- name: Install k3s on node and Join Cluster
+  ansible.builtin.shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent --server https://{{ server }} --token {{ token }}" sh -s -
+  when: not p.stat.exists

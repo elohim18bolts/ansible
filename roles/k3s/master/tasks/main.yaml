@@ -1,10 +1,38 @@
 ---
-- name: Install Dependencies
-  ansible.builtin.apt:
-    pkg:
-      - git
-      - curl
-    update_cache: yes
+- name: Install Deps and kubectl for Debian
+  block:
+  - name: Install Dependencies
+    ansible.builtin.apt:
+      pkg:
+        - git
+        - curl
+        - apt-transport-https
+        - ca-certificates
+      update_cache: yes
+
+  - name: Add Kubectl Repo Signing Keys
+    ansible.builtin.apt_key:
+      url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+      keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      state: present
+
+  - name: Add Kubectl Repo to Repolist
+    ansible.builtin.apt_repository:
+      repo: 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /'
+      filename: kubernetes
+      state: present
+
+  - name: Remove Previous Kubectl Binary
+    ansible.builtin.file:
+      path: /usr/local/bin/kubectl
+      state: absent
+
+  - name: Install kubectl
+    ansible.builtin.apt:
+      pkg:
+        - kubectl
+      state: present
+      update_cache: yes
   when: ansible_os_family == "Debian"
 
 - name: Create configuration path
@@ -20,8 +48,7 @@
     src: config.yaml.j2
     dest: "/etc/rancher/k3s/config.yaml"
     owner: root
-    group: root
-    mode: '0644'
+    mode: "u=rw,g=,o="
 
 - name: Load Kubelet DNS Resolver Configuration
   ansible.builtin.template:
@@ -31,7 +58,44 @@
     group: root
   when: dns_servers is defined
 
+- name: Check if k3s service is already in the system
+  ansible.builtin.stat:
+    path: /etc/systemd/system/k3s.service
+  register: p
+
 - name: Run k3s Installation Script
   ansible.builtin.shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server" sh -s
+  when: not p.stat.exists 
     
+- name: Get Token
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/token
+  register: token 
+
+- name: Create .kube Directory
+  ansible.builtin.file:
+    path: ~{{ ansible_user }}/.kube
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: "u=rwx,g=rx,o="
+
+- name: Copy Config to User Home Directory
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: ~{{ ansible_user }}/.kube/config
+    remote_src: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "u=rw,g=r,o=r"
+
+- name: Replace https://locahost:6443 by https://master_ip:6443
+  ansible.builtin.command: >-
+    k3s kubectl config set-cluster default 
+    --server=https://{{ ansible_default_ipv4['address'] }}:6443
+    --kubeconfig ~{{ ansible_user }}/.kube/config
+  changed_when: true
+
+- name: Present Token To All Clients
+  ansible.builtin.set_fact: 
+    token: "{{ token.content | b64decode | regex_replace('\n','') }}"
 
