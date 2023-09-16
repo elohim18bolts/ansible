@@ -15,10 +15,6 @@
       ansible.builtin.apt:
         autoremove: yes
 
-    - name: "Perform Safe Upgrade"
-      ansible.builtin.apt:
-        upgrade: yes
-
     - name: "Check If The Server Needs a Reboot"
       ansible.builtin.stat:
         path: /var/run/reboot-required
