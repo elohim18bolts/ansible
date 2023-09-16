@@ -4,7 +4,7 @@ This are my ansible configs to create and install roles in remote machines. I us
 ## Install
 Before the host can run by itself you must push the ansible configuration only once using the command:
 ```bash
-ansible-playbook all.yaml -u root --ask-pass -i $hostname,
+ ansible-playbook  -u <user> --private-key <private-key-path> -K --ask-vault-pass -i host1,host2, all.yaml
 ```
 The file `all.yaml` is the playbook file containeing the initial hosts who will be running `ansible-pull` job.
 An example of this file can be:
