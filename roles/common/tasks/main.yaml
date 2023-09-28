@@ -1,17 +1,12 @@
 ---
+
 - name: Configure users and keys
   tags: ["common"]
   block:
-  - name: Update and install common packages
-    ansible.builtin.apt:
-      pkg:
-        - sudo
-        - ansible
-        - git
-      state: present
-      update_cache: yes
-    when: ansible_facts["os_family"] == "Debian"
-        
+  - name: Packages...
+    ansible.builtin.include_tasks:
+      file: packages.yaml
+
 
   - name: Create ansible user
     ansible.builtin.user:

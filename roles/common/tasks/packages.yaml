@@ -1,0 +1,13 @@
+---
+- name: Update and install common packages
+  ansible.builtin.apt:
+    pkg:
+      - sudo
+      - ansible
+      - git
+      - unzip
+      - tar
+      - fontconfig
+    state: present
+    update_cache: yes
+  when: ansible_facts["os_family"] == "Debian"
