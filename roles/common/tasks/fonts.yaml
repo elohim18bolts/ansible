@@ -1,0 +1,37 @@
+---
+- name: Create Fonts Assets Directory
+  ansible.builtin.file:
+    path: "/ansible/fonts"
+    mode: "0766"
+    group: "sudo"
+    state: directory
+
+- name: Check Cache
+  ansible.builtin.stat:
+    path: "/ansible/fonts/{{ item }}.zip"
+  loop: "{{ nerd_fonts }}"
+  register: fonts
+
+
+    # https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/<FONT_NAME>.zip
+- name: "Download Nerd Fonts"
+  ansible.builtin.get_url:
+    url: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/{{ item.0 }}.zip"
+    dest: "/ansible/fonts/{{ item.0 }}.zip"
+  when: not item.1.stat.exists
+  loop: "{{ nerd_fonts | product(fonts.results) | list }}"
+  ignore_errors: true
+
+
+- name: Unzip Nerd Fonts
+  ansible.builtin.unarchive:
+    src: "/ansible/fonts/{{ item }}.zip"
+    dest: "/usr/local/share/fonts"
+    remote_src: yes
+    group: "sudo"
+    mode: "0766"
+  loop: "{{ nerd_fonts }}"
+
+
+
+
