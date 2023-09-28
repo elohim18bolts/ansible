@@ -1,14 +1,56 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 #
+#
 require 'yaml'
-file = YAML.load_file("./vagrant/inventory.yaml")
-master_node = (file['vagrant_masters']['hosts']).keys
-#master_node = []
-nodes = (file['vagrant_nodes']['hosts']).keys
-nodes = master_node.concat(nodes)
-
 PROVISIONER = "parallels"
+
+def test_k3s_role(config,inventoryPath)
+  yamlFile= YAML.load_file(inventoryPath)
+  master_node = (yamlFile["k3s_masters"]["hosts"]).keys
+  #master_node = []
+  nodes = (yamlFile['k3s_nodes']['hosts']).keys
+  nodes = master_node.concat(nodes)
+
+  raw_ssh_key_args = []
+
+  nodes.each_with_index do |node,index|
+    config.vm.define "node-#{index}" do |n|
+      n.vm.network "private_network",ip:"#{node}"
+      n.vm.hostname = "node-#{index}"
+      raw_ssh_key_args << "-o IdentityFile=.vagrant/machines/node-#{index}/#{PROVISIONER}/private_key"
+      if index == (nodes.length - 1)
+        sleep(2)
+        n.vm.provision :ansible do |ansible|
+          ansible.verbose = "v"
+          ansible.limit = "all"
+          ansible.inventory_path = "vagrant/inventory.yaml"
+          ansible.playbook = "vagrant/vagrant_play.yaml"
+          ansible.raw_ssh_args = raw_ssh_key_args
+        end
+      end
+    end
+  end
+end
+
+def test_common_role(config, inventoryPath)
+  yamlFile = YAML.load_file(inventoryPath)
+  host = (yamlFile['test_node']['hosts']).keys[0]
+  config.vm.define "test_node" do |node|
+    node.vm.network "private_network",ip:"#{host}"
+    node.vm.hostname = "test-node"
+    node.vm.provision :ansible do |ansible|
+      ansible.verbose = "v"
+      ansible.limit = "all"
+      ansible.inventory_path = "vagrant/inv_single_node.yaml"
+      ansible.playbook = "vagrant/vagrant_play.yaml"
+      ansible.raw_arguments = [
+        "--ask-vault-pass"
+      ]
+    end
+  end
+end
+
 #
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -47,26 +89,8 @@ Vagrant.configure("2") do |config|
      prl.memory = "1024"
    end
 
- # Store the raw ssh key arguments for each node
-  raw_ssh_key_args = []
-
-  nodes.each_with_index do |node,index|
-    config.vm.define "node-#{index}" do |n|
-      n.vm.network "private_network",ip:"#{node}"
-      n.vm.hostname = "node-#{index}"
-      raw_ssh_key_args << "-o IdentityFile=.vagrant/machines/node-#{index}/#{PROVISIONER}/private_key"
-      if index == (nodes.length - 1)
-        sleep(2)
-        n.vm.provision :ansible do |ansible|
-          ansible.verbose = "v"
-          ansible.limit = "all"
-          ansible.inventory_path = "vagrant/inventory.yaml"
-          ansible.playbook = "vagrant/vagrant_play.yaml"
-          ansible.raw_ssh_args = raw_ssh_key_args
-        end
-      end
-    end
-  end
+   #test_k3s_role(config,"./vagrant/inventory.yaml")
+   test_common_role(config,"vagrant/inv_single_node.yaml")
 
 
 end
