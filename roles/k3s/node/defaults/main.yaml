@@ -1,2 +1,2 @@
-server: "{{ hostvars[groups['vagrant_masters'][0]].ansible_default_ipv4.address }}:6443" 
-token: "{{ hostvars[groups['vagrant_masters'][0]].token }}"
+server: "{{ hostvars[groups['k3s_masters'][0]].ansible_default_ipv4.address }}:6443" 
+token: "{{ hostvars[groups['k3s_masters'][0]].token }}"

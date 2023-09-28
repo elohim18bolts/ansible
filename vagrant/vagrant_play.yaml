@@ -1,10 +1,10 @@
 ---
-- hosts: vagrant_masters
+- hosts: k3s_masters 
   become: yes
   roles:
     - ../roles/k3s/master
 
-- hosts: vagrant_nodes
+- hosts: k3s_nodes 
   become: yes
   roles:
     - ../roles/k3s/node

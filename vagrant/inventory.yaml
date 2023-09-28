@@ -1,8 +1,8 @@
-vagrant_masters:
+k3s_masters:
   hosts:
     192.168.1.10:
 
-vagrant_nodes:
+k3s_nodes:
   hosts:
     192.168.1.11:
     192.168.1.12:
