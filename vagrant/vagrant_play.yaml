@@ -8,3 +8,8 @@
   become: yes
   roles:
     - ../roles/k3s/node
+
+- hosts: test_node
+  become: yes
+  roles:
+    - ../roles/common
