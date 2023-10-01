@@ -1,0 +1,48 @@
+---
+- name: Check If Dotfiles are In Cache
+  ansible.builtin.stat:
+    path: "/ansible/dotfiles"
+  register: dotfiles
+
+- name: Create Config Directory If It does not Exists
+  ansible.builtin.file:
+    path: "/home/{{ vault.username }}/.config"
+    state: "directory"
+
+- name: ""
+  block:
+  - name: "Clone DotFiles Repo"
+    ansible.builtin.git:
+      repo: "https://github.com/elohim18bolts/dotfiles"
+      dest: "/ansible/dotfiles"
+      clone: yes
+      single_branch: yes
+      version: main
+  - name: Changing Dotfiles Directory Permisssions
+    ansible.builtin.file:
+      path: "/ansible/dotfiles"
+      owner: "{{ vault.username }}"
+      group: "{{ vault.username }}"
+      mode: 0775
+      recurse: yes
+  when: not dotfiles.stat.exists
+
+
+- name: Linking Files To Config Directory
+  ansible.builtin.file:
+    src: "/ansible/dotfiles/{{ item }}"
+    dest: "/home/{{ vault.username }}/.config/{{ item }}"
+    state: link
+    owner: "{{ vault.username }}"
+    group: "{{ vault.username }}"
+    mode: 0775
+  loop:
+    - i3
+    - i3status
+    - nvim
+    - kitty
+    - lf
+    - rofi
+    - starship.toml
+
+
