@@ -1,6 +1,12 @@
 # Summary
 This are my ansible configs to create and install roles in remote machines. I use `ansible-pull` command to provision each host.
 
+## Requirements
+First install `ansible-galaxy community` collection.
+```bash 
+ansible-galaxy collection install community.general
+```
+
 ## Install
 Before the host can run by itself you must push the ansible configuration only once using the command:
 ```bash
