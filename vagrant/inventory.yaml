@@ -1,6 +1,6 @@
 k3s_masters:
   hosts:
-    192.168.1.10:
+    192.168.1.5:
 
 k3s_nodes:
   hosts:
@@ -9,5 +9,5 @@ k3s_nodes:
 
 test_node:
   hosts:
-    192.168.1.23:
+    192.168.1.10:
 

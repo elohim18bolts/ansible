@@ -1,15 +1,16 @@
 ---
-- hosts: k3s_masters 
-  become: yes
-  roles:
-    - ../roles/k3s/master
-
-- hosts: k3s_nodes 
-  become: yes
-  roles:
-    - ../roles/k3s/node
+#- hosts: k3s_masters 
+#  become: yes
+#  roles:
+#    - ../roles/k3s/master
+#
+#- hosts: k3s_nodes 
+#  become: yes
+#  roles:
+#    - ../roles/k3s/node
 
 - hosts: test_node
   become: yes
   roles:
     - ../roles/common
+    - ../roles/workstation
