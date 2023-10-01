@@ -1,0 +1,114 @@
+---
+- name: Configure users and keys
+  tags: ["common"]
+  block:
+  - name: Create ansible user
+    ansible.builtin.user:
+      name: "ansible"
+      system: true
+      groups: ["sudo"]
+
+
+  - name: Create sudoer file for ansible user
+    ansible.builtin.template:
+      src: "ansible-sudoer.j2"
+      dest: "/etc/sudoers.d/ansible"
+      owner: root
+      group: root
+      mode: 0440
+
+  - name: Create ansible pull systemd timer
+    ansible.builtin.template:
+      src: "ansible-pull.timer.j2"
+      dest: "{{ systemd_dir }}/ansible-pull.timer"
+      owner: root
+      group: root
+      mode: 0644
+    when: ansible_facts["service_mgr"] == "systemd"
+
+
+  - name: Create ansible pull service
+    ansible.builtin.template:
+      src: "ansible-pull.service.j2"
+      dest: "{{ systemd_dir }}/ansible-pull.service"
+      owner: root
+      group: root
+      mode: 0644
+    notify: Enable timer
+    when: ansible_facts["service_mgr"] == "systemd"
+
+  - name: Disable password for root user
+    ansible.builtin.user:
+      name: root
+      password_lock: true
+
+  - name: Copy ssh public key
+    ansible.builtin.lineinfile:
+      path: /root/.ssh/authorized_keys
+      create: true
+      mode: 0600
+      insertafter: EOF
+      line: "{{ lookup ('file', '~/.ssh/id_ed25519.pub') }}"
+
+  - name: Disable ssh password login
+    ansible.builtin.lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '(PermitRootLogin.*)'
+      line: '#\1'
+      backrefs: yes
+    notify: Restart sshd
+
+  - name: Enable SSH key login
+    ansible.builtin.lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '#(PubkeyAuthentication.*)'
+      line: '\1'
+      backrefs: yes
+
+- name: Check If Username Was Already Created
+  ansible.builtin.stat:
+    path: "/ansible/{{ vault.username }}"
+  register: user_created
+
+- name: "Caching User"
+  block:
+  - name: Create User For This System
+    ansible.builtin.user:
+      name: "{{ vault.username }}" 
+      comment: "Raise and Shine"
+      append: true 
+      groups: [ "sudo" ]
+      shell: "/bin/zsh"
+      password: "{{ vault.user_password | password_hash('sha512') }}"
+      state: present
+      expires: -1
+
+  - name: Copy ssh public key
+    ansible.builtin.lineinfile:
+      path: "/home/{{ vault.username }}/.ssh/authorized_keys"
+      create: true
+      insertafter: EOF
+      line: "{{ lookup ('file', '~/.ssh/id_ed25519.pub') }}"
+      owner: "{{ vault.username }}"
+      group: "{{ vault.username }}"
+      mode: 0600
+    notify: Restart sshd
+
+
+
+  - name: Enforce Password Change
+    ansible.builtin.shell: "passwd -e {{ vault.username }}"
+
+  - name: Create User File
+    ansible.builtin.file:
+      path: "/ansible/{{ vault.username }}"
+      owner: "{{ vault.username }}"
+      group: "{{ vault.username }}"
+      mode: 0600
+      state: touch
+  when: not user_created.stat.exists
+
+
+
+
+

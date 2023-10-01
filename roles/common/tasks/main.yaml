@@ -5,84 +5,29 @@
     name: vault
   no_log: true
 
-- name: Configure users and keys
-  tags: ["common"]
-  block:
-  - name: Packages...
-    ansible.builtin.include_tasks:
-      file: packages.yaml
-
-  - name: Copy Vault Password To Remote
-    ansible.builtin.copy:
-      content: "{{ vault.vault_password }}"
-      dest: "/etc/vault"
-      owner: root
-      group: root
-      mode: "0660"
-
-  - name: Create ansible user
-    ansible.builtin.user:
-      name: "ansible"
-      system: true
-      groups: ["sudo"]
-
-
-  - name: Create sudoer file for ansible user
-    ansible.builtin.template:
-      src: "ansible-sudoer.j2"
-      dest: "/etc/sudoers.d/ansible"
-      owner: root
-      group: root
-      mode: 0440
-
-  - name: Create ansible pull systemd timer
-    ansible.builtin.template:
-      src: "ansible-pull.timer.j2"
-      dest: "{{ systemd_dir }}/ansible-pull.timer"
-      owner: root
-      group: root
-      mode: 0644
-    when: ansible_facts["service_mgr"] == "systemd"
-
-
-  - name: Create ansible pull service
-    ansible.builtin.template:
-      src: "ansible-pull.service.j2"
-      dest: "{{ systemd_dir }}/ansible-pull.service"
-      owner: root
-      group: root
-      mode: 0644
-    notify: Enable timer
-    when: ansible_facts["service_mgr"] == "systemd"
-
-  - name: Disable password for root user
-    ansible.builtin.user:
-      name: root
-      password_lock: true
-
-  - name: Copy ssh public key
-    ansible.builtin.lineinfile:
-      path: /root/.ssh/authorized_keys
-      create: true
-      mode: 0600
-      insertafter: EOF
-      line: "{{ lookup ('file', '~/.ssh/id_ed25519.pub') }}"
-
-  - name: Disable ssh password login
-    ansible.builtin.lineinfile:
-      path: /etc/ssh/sshd_config
-      regexp: '(PermitRootLogin.*)'
-      line: '#\1'
-    notify: Restart sshd
-
-  - name: Run Fonts Task...
-    ansible.builtin.include_tasks:
-      file: fonts.yaml
-
+- name: Copy Vault Password To Remote
+  ansible.builtin.copy:
+    content: "{{ vault.vault_password }}"
+    dest: "/etc/vault"
+    owner: root
+    group: root
+    mode: "0660"
 
 - name: Create Ansible Cache Directory
   ansible.builtin.file:
     path: "/ansible"
     mode: "0775"
     state: directory
+
+- name: Add User Tasks...
+  ansible.builtin.include_tasks:
+    file: users.yaml
+
+
+
+  - name: Run Fonts Task...
+    ansible.builtin.include_tasks:
+      file: fonts.yaml
+
+
 
