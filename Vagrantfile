@@ -42,7 +42,7 @@ def test_common_role(config, inventoryPath)
     node.vm.provision :ansible do |ansible|
       ansible.verbose = "v"
       ansible.limit = "all"
-      ansible.inventory_path = "vagrant/inv_single_node.yaml"
+      ansible.inventory_path = inventoryPath
       ansible.playbook = "vagrant/vagrant_play.yaml"
       ansible.raw_arguments = [
         "--ask-vault-pass"
@@ -90,7 +90,7 @@ Vagrant.configure("2") do |config|
    end
 
    #test_k3s_role(config,"./vagrant/inventory.yaml")
-   test_common_role(config,"vagrant/inv_single_node.yaml")
+   test_common_role(config,"vagrant/inventory.yaml")
 
 
 end
