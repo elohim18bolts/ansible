@@ -1,0 +1,18 @@
+---
+- name: Check If ly Exists In The System
+  ansible.builtin.stat:
+    path: "/ansible/lxdm"
+  register: lxdm
+  when: dm == "lxdm"
+
+- name: ""
+  block:
+    - name: Install lxdm Display Manager
+      ansible.builtin.apt:
+        name: lxdm
+        state: present
+    - name: Cache lxdm 
+      ansible.builtin.file:
+        path: "/ansible/lxdm"
+        state: touch
+  when: ansible_os_family == "Debian" and not lxdm.stat.exists

@@ -1,0 +1,39 @@
+---
+- name: Check If ly Exists In The System
+  ansible.builtin.stat:
+    path: "/ansible/ly"
+  register: ly
+  when: dm == "ly"
+
+- name: Install ly Display Manager
+  block:
+    - name: Install Dependencies
+      ansible.builtin.apt:
+        pkg:
+          - libpam0g-dev
+          - libxcb-xkb-dev
+        state: present
+
+    - name: Download git repo
+      ansible.builtin.git:
+        repo: https://github.com/fairyglade/ly
+        dest: "/ansible/ly"
+        clone: yes
+        single_branch: yes
+        version: master
+
+    - name: Build ly
+      community.general.make:
+        chdir: "/ansible/ly"
+
+    - name: Install ly
+      community.general.make:
+        chdir: "/ansible/ly"
+        target: install
+
+    - name: Install ly Service
+      community.general.make:
+        chdir: "/ansible/ly"
+        target: installsystemd
+  notify: ly
+  when: ansible_os_family == "Debian" and dm == "ly" and not ly.stat.exists

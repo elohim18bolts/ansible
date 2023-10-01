@@ -1,0 +1,35 @@
+---
+- name: Install Nix Packages For WorkStation
+  ansible.builtin.shell: |
+     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+     nix profile install 'nixpkgs#{{ item }}'
+  changed_when: true
+  loop: 
+    - kitty
+    - dmenu
+  when: ansible_system == "Linux"
+
+
+- name: "Add i3 Task..."
+  ansible.builtin.include_tasks:
+    file: i3.yaml
+
+- name: Add ly Task...
+  ansible.builtin.include_tasks:
+    file: ly.yaml
+
+- name: Add lxdm Task...
+  ansible.builtin.include_tasks:
+    file: lxdm.yaml
+
+
+
+
+
+
+
+
+
+
+
+

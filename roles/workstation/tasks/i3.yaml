@@ -1,0 +1,45 @@
+---
+- name: Install Xorg For Debian
+  ansible.builtin.apt:
+    pkg:
+      - xorg
+    state: present
+  when: ansible_os_family == "Debian" and de == "i3"
+
+
+- name: Install Nix's i3 
+  ansible.builtin.shell: |
+     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+     nix profile install 'nixpkgs#{{ item }}'
+  changed_when: true
+  loop: 
+    - i3
+    - i3lock
+    - i3status
+    - dunst
+  when: ansible_system == "Linux"
+
+- name: Create i3 Session
+  block:
+    - name: ""
+      ansible.builtin.file:
+        path: "/usr/share/xsessions"
+        state: directory
+
+    - name: ""
+      ansible.builtin.copy:
+        content: |
+          [Desktop Entry]
+          Name=i3
+          Comment=improved dynamic tiling window manager
+          Exec=/nix/var/nix/profiles/default/bin/i3
+          TryExec=/nix/var/nix/profiles/default/bin/i3
+          Type=Application
+          X-LightDM-DesktopName=i3
+          DesktopNames=i3
+          Keywords=tiling;wm;windowmanager;window;manager;
+        dest: "/usr/share/xsessions/i3.desktop"
+        mode: 0755
+
+
+
