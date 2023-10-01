@@ -25,9 +25,9 @@
 
 
 
-  - name: Run Fonts Task...
-    ansible.builtin.include_tasks:
-      file: fonts.yaml
+- name: Run Fonts Task...
+  ansible.builtin.include_tasks:
+    file: fonts.yaml
 
 
 

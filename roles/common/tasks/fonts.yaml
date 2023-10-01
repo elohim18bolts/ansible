@@ -2,8 +2,7 @@
 - name: Create Fonts Assets Directory
   ansible.builtin.file:
     path: "/ansible/fonts"
-    mode: "0766"
-    group: "sudo"
+    mode: "0775"
     state: directory
 
 - name: Check Cache
@@ -28,8 +27,7 @@
     src: "/ansible/fonts/{{ item }}.zip"
     dest: "/usr/local/share/fonts"
     remote_src: yes
-    group: "sudo"
-    mode: "0766"
+    mode: "0775"
   loop: "{{ nerd_fonts }}"
 
 
