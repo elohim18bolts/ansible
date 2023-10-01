@@ -80,3 +80,9 @@
       file: fonts.yaml
 
 
+- name: Create Ansible Cache Directory
+  ansible.builtin.file:
+    path: "/ansible"
+    mode: "0775"
+    state: directory
+
