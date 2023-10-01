@@ -1,4 +1,25 @@
 ---
+- name: Install Nix Packages
+  ansible.builtin.shell: |
+     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+     nix profile install 'nixpkgs#{{ item }}'
+  changed_when: true
+  loop: 
+    - neovim
+    - ansible
+    - git
+    - fontconfig
+    - xdotool
+    - pipx
+    - zsh-syntax-highlighting
+    - neofetch
+  when: ansible_system == "Linux"
+
+- name: Install NixGL to Support OpenGL Apps
+  ansible.builtin.shell: |
+     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+     nix profile install --impure 'github:guibou/nixGL'
+  when: ansible_system == "Linux"
 
 
 - name: Install Debian Packages

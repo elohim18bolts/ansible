@@ -23,6 +23,9 @@
   ansible.builtin.include_tasks:
     file: users.yaml
 
+- name: Add Nix Tasks...
+  ansible.builtin.include_tasks:
+    file: nix.yaml
 
 - name: Add Flathub Repo
   community.general.flatpak_remote:

@@ -1,0 +1,45 @@
+---
+- name: Check If nix Is In The Cache
+  ansible.builtin.stat:
+    path: "/ansible/nix"
+  register: nix
+
+
+- name: "Install nix Package Manager..."
+  block:
+  - name: Create nix Cache Directory
+    ansible.builtin.file:
+      path: "/ansible/nix"
+      state: directory
+
+  - name: Download nix Installer
+    ansible.builtin.get_url:
+      url: https://nixos.org/nix/install
+      dest: "/ansible/nix/install"
+      mode: 0750
+
+  - name: Install nix
+    ansible.builtin.shell:
+      cmd: "./install --daemon < /dev/null"
+      chdir: "/ansible/nix"
+
+  - name: Enable Flakes
+    ansible.builtin.lineinfile:
+      path: "/etc/nix/nix.conf"
+      line: "experimental-features = nix-command flakes"
+      create: true
+      state: present
+  when: not nix.stat.exists
+
+- name: Add Locale Archive To Fix Missing Locale Error For Nix Apps
+  ansible.builtin.lineinfile:
+    path: "/etc/profile"
+    line: "export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive"
+    insertbefore: 'BOF'
+    state: present
+    firstmatch: yes
+
+- name: Add Packages Tasks...
+  ansible.builtin.include_tasks:
+    file: packages.yaml
+
