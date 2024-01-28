@@ -11,7 +11,7 @@
       shell: "/bin/bash"
       password: "{{ vault.password }}"
       state: present
-      expire: -1
+      expires: -1
 
 
   - name: Check If User Changed Password
