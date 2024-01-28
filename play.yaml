@@ -6,7 +6,7 @@
   roles: 
     - maintenance
 
-- hosts: ubunt-testing
+- hosts: ubnt-*
   gather_facts: yes
   user: ansible
   become: true
