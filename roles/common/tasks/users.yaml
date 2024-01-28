@@ -9,7 +9,7 @@
       append: true 
       groups: [ "sudo" ]
       shell: "/bin/bash"
-      password: "{{ vault.password }}"
+      password: {{ vault.password | pasword_hash('sha512') }}
       state: present
       expires: -1
 
