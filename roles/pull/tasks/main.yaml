@@ -50,14 +50,6 @@
     name: vault
   no_log: true
 
-- name: Copy Vault Password To Remote
-  ansible.builtin.copy:
-    content: "{{ vault.vault_password }}"
-    dest: "/etc/vault"
-    owner: root
-    group: root
-    mode: "0660"
-
 - name: Copy Vault To Remote
   ansible.builtin.copy:
     src: defaults/user_vault.yaml
