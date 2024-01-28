@@ -1,44 +1,36 @@
 ---
 - name: Load sensitive data
   ansible.builtin.include_vars:
-    file: defaults/vault.yaml
+    file: /etc/vault.yaml
     name: vault
   no_log: true
 
-- name: Copy Vault Password To Remote
-  ansible.builtin.copy:
-    content: "{{ vault.vault_password }}"
-    dest: "/etc/vault"
-    owner: root
-    group: root
-    mode: "0660"
-
-- name: Create Ansible Cache Directory
-  ansible.builtin.file:
-    path: "/ansible"
-    mode: "0775"
-    state: directory
+      #- name: Create Ansible Cache Directory
+      #  ansible.builtin.file:
+      #    path: "/ansible"
+      #    mode: "0775"
+      #    state: directory
 
 - name: Add User Tasks...
   ansible.builtin.include_tasks:
     file: users.yaml
 
-- name: Add Nix Tasks...
-  ansible.builtin.include_tasks:
-    file: nix.yaml
+      #- name: Add Nix Tasks...
+      #  ansible.builtin.include_tasks:
+      #    file: nix.yaml
 
-- name: Add Flathub Repo
-  community.general.flatpak_remote:
-    name: flathub
-    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-    state: present
+      #- name: Add Flathub Repo
+      #  community.general.flatpak_remote:
+      #    name: flathub
+      #    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+      #    state: present
 
-- name: Run Fonts Task...
-  ansible.builtin.include_tasks:
-    file: fonts.yaml
+      #- name: Run Fonts Task...
+      #  ansible.builtin.include_tasks:
+      #    file: fonts.yaml
 
 
-- name: Run dotfiles Tasks...
-  ansible.builtin.include_tasks:
-    file: dotfiles.yaml
+      #- name: Run dotfiles Tasks...
+      #  ansible.builtin.include_tasks:
+      #    file: dotfiles.yaml
 

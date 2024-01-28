@@ -1,4 +1,71 @@
 ---
+- name: Create ansible user
+  ansible.builtin.user:
+    name: "ansible"
+    append: true
+    groups: ["sudo"]
+    state: present
+
+
+- name: Create sudoer file for ansible user
+  ansible.builtin.template:
+    src: "ansible-sudoer.j2"
+    dest: "/etc/sudoers.d/ansible"
+    owner: root
+    group: root
+    mode: 0440
+
+- name: Copy ssh public key for ansible user
+  ansible.builtin.lineinfile:
+    path: /home/ansible/.ssh/authorized_keys
+    create: true
+    mode: 0600
+    insertafter: EOF
+    line: "{{ lookup ('file', '~/.ssh/ansible.pub') }}"
+
+- name: Disable password for root user
+  ansible.builtin.user:
+    name: root
+    password_lock: true
+
+
+- name: Disable ssh password login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '(PermitRootLogin.*)'
+    line: '#\1'
+    backrefs: yes
+  notify: Restart sshd
+
+- name: Enable SSH key login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '#(PubkeyAuthentication.*)'
+    line: '\1'
+    backrefs: yes
+
+- name: Load sensitive data
+  ansible.builtin.include_vars:
+    file: defaults/user_vault.yaml
+    name: vault
+  no_log: true
+
+- name: Copy Vault Password To Remote
+  ansible.builtin.copy:
+    content: "{{ vault.vault_password }}"
+    dest: "/etc/vault"
+    owner: root
+    group: root
+    mode: "0660"
+
+- name: Copy Vault To Remote
+  ansible.builtin.copy:
+    src: defaults/user_vault.yaml
+    dest: "/etc/vault.yaml"
+    owner: root
+    group: root
+    mode: "0660"
+
 - name: Load sensitive data
   ansible.builtin.include_vars:
     file: defaults/vault.yaml
