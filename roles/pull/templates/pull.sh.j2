@@ -1,0 +1,9 @@
+#!/bin/bash
+hostname=$(uname -n)
+truncate --size=0 {{ log_path }} && \
+ansible-pull -U {{ repo_url }} \
+{% if only_if_changed -%} --only-if-changed {%- endif %} \
+--directory {{ repo_local_directory }}  -i $hostname, {{ playbook_path }}
+if [ -x "$(command -v mail)" ]; then 
+cat {{ log_path }} | mail -s "${hostname} Maintenance Alert" {{ vault.recipient_email }}
+fi

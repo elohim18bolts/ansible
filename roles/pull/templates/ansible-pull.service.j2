@@ -1,0 +1,12 @@
+[Unit]
+Description=Ansible pull service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart= {{ pull_executable }}
+TimeoutStopSec=600
+
+[Install]
+WantedBy=basic.target

@@ -1,0 +1,6 @@
+---
+- name: "Enable timer"
+  ansible.builtin.service:
+    name: ansible-pull.timer
+    state: started
+    enabled: yes

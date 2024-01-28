@@ -1,0 +1,11 @@
+only_if_changed: true
+ansible_pull_timer: |
+  OnBootSec=5min
+  OnCalendar=Fri *-*-* 00:00:00
+repo_url: "https://github.com/elohim18bolts/ansible"
+systemd_dir: "/etc/systemd/system"
+repo_local_directory: /opt/ansible
+pull_executable: "/usr/bin/ansible-pull.sh"
+log_path: /var/log/ansible.log
+playbook_path: "{{ repo_local_directory }}/play.yaml"
+

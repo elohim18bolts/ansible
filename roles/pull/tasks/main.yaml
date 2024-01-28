@@ -1,0 +1,34 @@
+---
+- name: Load sensitive data
+  ansible.builtin.include_vars:
+    file: defaults/vault.yaml
+    name: vault
+  no_log: true
+
+- name: Create ansible pull script
+  ansible.builtin.template:
+    src: "pull.sh.j2"
+    dest: "{{ pull_executable }}"
+    owner: root
+    group: root
+    mode: 0744
+
+- name: Create ansible pull systemd timer
+  ansible.builtin.template:
+    src: "ansible-pull.timer.j2"
+    dest: "{{ systemd_dir }}/ansible-pull.timer"
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_facts["service_mgr"] == "systemd"
+
+
+- name: Create ansible pull service
+  ansible.builtin.template:
+    src: "ansible-pull.service.j2"
+    dest: "{{ systemd_dir }}/ansible-pull.service"
+    owner: root
+    group: root
+    mode: 0644
+  notify: "Enable timer"
+  when: ansible_facts["service_mgr"] == "systemd"
