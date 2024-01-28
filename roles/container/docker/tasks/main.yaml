@@ -59,6 +59,7 @@
         - "docker-compose-plugin"
       state: latest
       update_cache: yes
+    notify: Docker
 
   - name: "Add plugins to PATH"
     ansible.builtin.lineinfile:
@@ -66,3 +67,6 @@
       line: "export PATH=$PATH:/usr/libexec/docker/cli-plugins" 
       state: present
   when: ansible_distribution == "Ubuntu"
+
+
+  
