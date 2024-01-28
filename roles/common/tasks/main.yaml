@@ -4,7 +4,6 @@
     file: /etc/vault.yaml
     name: vault
   no_log: true
-
       #- name: Create Ansible Cache Directory
       #  ansible.builtin.file:
       #    path: "/ansible"
