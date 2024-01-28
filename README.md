@@ -12,6 +12,8 @@ Before the host can run by itself you must push the ansible configuration only o
 ```bash
  ansible-playbook  -u <user> --private-key <private-key-path> -K --ask-vault-pass -i host1,host2, all.yaml
 ```
+In case that there are multiple vaults with diferent passwords, assign a `--vault-id` value to the `ansible-vault` command. Later pass `--vault-id` to the `ansible-playbook` command.
+
 The file `all.yaml` is the playbook file containeing the initial hosts who will be running `ansible-pull` job.
 An example of this file can be:
 ```yaml
