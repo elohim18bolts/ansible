@@ -9,19 +9,10 @@
       append: true 
       groups: [ "sudo" ]
       shell: "/bin/bash"
+      password: "{{ vault.password }}"
       state: present
+      expire: -1
 
-  - name: Copy ssh public key
-    ansible.builtin.lineinfile:
-      path: "/home/{{ vault.username }}/.ssh/authorized_keys"
-      create: true
-      state: present
-      insertafter: EOF
-      line: "{{ lookup ('file', '~/.ssh/{{ vault.username_ssh_key }}.pub') }}"
-      owner: "{{ vault.username }}"
-      group: "{{ vault.username }}"
-      mode: 0600
-    notify: Restart sshd
 
   - name: Check If User Changed Password
     ansible.builtin.stat:
