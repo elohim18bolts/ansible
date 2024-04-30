@@ -1,5 +1,5 @@
 ---
-- hosts: izanami,izanagi,kage*
+- hosts: izanami,izanagi,kage*,atlas*
   gather_facts: yes
   user: ansible
   become: true
